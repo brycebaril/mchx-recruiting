@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vxml version="2.0">
+
+<script><![CDATA[
+
+// covert tel: uris to numbers
+function uri_to_number(uri){
+    if( ! uri ) return;
+    uri = uri.split(':');
+    return uri[1];
+}
+
+var caller = uri_to_number( session.connection.remote.uri );
+
+]]></script>
+
+
+<menu>
+    <property name="inputmodes" value="dtmf"/>
+    <prompt>
+    Hello <value expr="caller"/> Say one of: <enumerate/>
+    </prompt>
+    <choice dtmf="1" next="http://adtrack.voicestar.com/vxml/customapps/cmg-ivr.vxml">1 continue</choice>
+    <choice dtmf="2" next="http://adtrack.voicestar.com/vxml/customapps/cmg-ivr.vxml">2 restart</choice>
+    <noinput>Please say one of <enumerate/></noinput>
+</menu>
+</vxml>
+
