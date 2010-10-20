@@ -1,6 +1,6 @@
 var ws = require("websocket-server"),
     http = require('http'),
-    form = require('/home/ubuntu/quiz/lib/www-forms.js'),
+    form = require('../lib/www-forms.js'),
     url = require('url'),
     sys = require('sys');
 
