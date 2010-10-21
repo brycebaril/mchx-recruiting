@@ -6,6 +6,11 @@
     {{message}}
   </div>
   {{/errors}}
+  {{#success}}
+  <div class="success">
+    <b>{{message}}</b>
+  </div>
+  {{/success}}
   <form method="post" action="/register">
     <table>
       <tr><th><label for="caller_name"  >Caller name:  </label></th><td><input type="text" id="caller_name"   name="caller_name"  ></td></tr>

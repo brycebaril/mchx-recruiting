@@ -15,6 +15,15 @@ var webport = 8080;
 var wsserver = ws.createServer();
 var rclient = redis.createClient();
 
+function useTemplate(response, template, context) {
+    mu.render(template, context, {}, function(err, output) {
+        if (err) { throw err; }
+        response.writeHead(200, {'Content-Type': 'text/html'});
+        output.addListener('data', function(c) { response.write(c); });
+        output.addListener('end',  function()  { response.end();    });
+    });
+}
+
 var getRoutes = {
     '/' : function(request, response) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
@@ -33,14 +42,7 @@ var getRoutes = {
         response.end();
     },
     '/register' : function(request, response) {
-//        response.write(require.paths.join("<BR>"));
-//        response.end();
-        mu.render('register', {}, {}, function(err, output) {
-            if (err) { throw err; }
-            response.writeHead(200, {'Content-Type': 'text/html'});
-            output.addListener('data', function(c) { response.write(c); });
-            output.addListener('end',  function()  { response.end();    });
-        });
+        useTemplate(response, 'register', {});
     },
     '/vxml' : function(request, response) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
@@ -72,21 +74,26 @@ var postRoutes = {
         if (!args.caller_number.match(/^\(?\d\d\d\)?-?\d\d\d-?\d\d\d\d$/)) { errors.push({message: "You must specify a 10-digit phone number including area code."}); }
         if (!args.caller_email .match(/^[^@, ]+@[^@, ]+$/))                { errors.push({message: "You must specify a valid email address."                      }); }
         if (errors.length > 0) {
-            mu.render('register', {errors: errors}, {}, function(err, output) {
-                if (err) { throw err; }
-                response.writeHead(200, {'Content-Type': 'text/html'});
-                output.addListener('data', function(c) { response.write(c); });
-                output.addListener('end',  function()  { response.end();    });
-            });
+            useTemplate(response, 'register', {errors: errors});
             return;
         }
         rclient.getset("quiz:" + args.caller_number + ":active", "true", function(err, reply) {
             if (reply == "true") {
-                
+                useTemplate(response, 'register', {errors: {message: "That phone number is already in use.  Please try another."}});
+                return;
             }
+            rclient.mset("quiz:" + args.caller_number + ":name",             args.caller_name,
+                         "quiz:" + args.caller_number + ":number",           args.caller_number,
+                         "quiz:" + args.caller_number + ":email",            args.caller_email,
+                         "quiz:" + args.caller_number + ":current_question", 0,
+                         function(err, reply) {
+                if (err) {
+                    useTemplate(response, 'register', {errors: {message: "There was an error storing your data.  Please try again."}});
+                    return;
+                }
+                useTemplate(response, 'register', {success: {message: "Thank you for registering."}});
+            });
         });
-        response.writeHead(200, {'Content-Type': 'text/plain'});
-        response.end('placeholder');
     },
     '/ping' : function(request, response, args) {
         response.writeHead(200, {
