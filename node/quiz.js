@@ -70,14 +70,22 @@ var postRoutes = {
     },
     '/register' : function(request, response, args) {
         var errors = new Array();
-        if (!args.caller_name  .match(/^.+$/))                             { errors.push({message: "You must specify your name."                                  }); }
-        if (!args.caller_number.match(/^\(?\d\d\d\)?-?\d\d\d-?\d\d\d\d$/)) { errors.push({message: "You must specify a 10-digit phone number including area code."}); }
-        if (!args.caller_email .match(/^[^@, ]+@[^@, ]+$/))                { errors.push({message: "You must specify a valid email address."                      }); }
+        if (!args.caller_name  ) { args.caller_name   = ''; }
+        if (!args.caller_number) { args.caller_number = ''; }
+        if (!args.caller_email ) { args.caller_email  = ''; }
+        args.caller_number = args.caller_number.replace(/[^\d]/g,'');
+        if (!args.caller_name  .match(/^.+$/))                   { errors.push({message: "You must specify your name."                                  }); }
+        if (!args.caller_number.match(/^\d\d\d\d\d\d\d\d\d\d$/)) { errors.push({message: "You must specify a 10-digit phone number including area code."}); }
+        if (!args.caller_email .match(/^[^@, ]+@[^@, ]+$/))      { errors.push({message: "You must specify a valid email address."                      }); }
         if (errors.length > 0) {
             useTemplate(response, 'register', {errors: errors});
             return;
         }
         rclient.getset("quiz:" + args.caller_number + ":active", "true", function(err, reply) {
+            if (err) {
+                useTemplate(response, 'register', {errors: {message: "There was an error storing your data.  Please try again."}});
+                return;
+            }
             if (reply == "true") {
                 useTemplate(response, 'register', {errors: {message: "That phone number is already in use.  Please try another."}});
                 return;
