@@ -197,15 +197,15 @@ var postRoutes = {
             }
             sys.log("Serving question " + question + " for caller " + args.caller);
             if (question == 0) {
-                useTemplate(response, 'vxml/welcome', { name: name, nocache: Math.floor(Math.random() * 1000000) });
+                useTemplate(response, 'vxml/welcome', { caller: args.caller, name: name, nocache: Math.floor(Math.random() * 1000000) });
                 rclient.incr("quiz:" + args.caller + ":current_question");
                 return;
             }
             if (questions[question]) {
-                useTemplate(response, 'vxml/question', { name: name, question: question, fallback_tts: questions[question].text, nocache: Math.floor(Math.random() * 1000000) });
+                useTemplate(response, 'vxml/question', { caller: args.caller, name: name, question: question, fallback_tts: questions[question].text, nocache: Math.floor(Math.random() * 1000000) });
                 return;
             }
-            useTemplate(response, 'vxml/finish', { name: name, position: score, nocache: Math.floor(Math.random() * 1000000) });
+            useTemplate(response, 'vxml/finish', { caller: args.caller, name: name, position: score, nocache: Math.floor(Math.random() * 1000000) });
         });
     },
     '/vxml/answer' : function(request, response, args) {
@@ -245,14 +245,15 @@ var postRoutes = {
             sys.log("Grading question " + question + " for caller " + args.caller + ": " + correct);
             if (correct) {
                 rclient.incr("quiz:" + args.caller + ":current_question");
-                question = question + 1;
+                question = Math.floor(question) + 1;
             }
             if (questions[question]) {
-                useTemplate(response, 'vxml/answer', { name: name, answer_status: correct, answer_status_tts: answer_text[correct],
+                useTemplate(response, 'vxml/answer', { caller: args.caller, name: name, answer_status: correct, answer_status_tts: answer_text[correct],
                                                        question: question, fallback_tts: questions[question].text, nocache: Math.floor(Math.random() * 1000000) });
                 return;
             }
-            useTemplate(response, 'vxml/finish', { name: name, position: score, nocache: Math.floor(Math.random() * 1000000) });
+            var score = 0;
+            useTemplate(response, 'vxml/finish', { caller: args.caller, name: name, position: score, nocache: Math.floor(Math.random() * 1000000) });
         });
     },
     '/vxml' : function(request, response, args) {
