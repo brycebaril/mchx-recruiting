@@ -1,8 +1,8 @@
 1.gsm
-Multiple choice: What is your favorite programming language? (1) C++ (2) Java (3) Perl (4) Python (5) Ruby (6) Haskell (7) Erlang (8) Bourne Shell (9) Other
+Multiple choice: What is your favorite programming language? 1 C plus plus 2 Java 3 Perl 4 Python 5 Ruby 6 Haskell 7 Erlang 8 Bourne Shell 9 Other
 
 2.gsm
-About how many University of Washington Computer Science and Engineering undergraduate students graduate each year: 50, 100, 160, or 250?
+About how many University of Washington Computer Science and Engineering undergraduate students graduate each year 50 100 160 or 250?
 
 3.gsm
 How many bits are there in a byte?
@@ -26,7 +26,7 @@ What is the HTTP error code for File Not Found?
 In what year will the Unix epoch time exceed 32 bits?
 
 10.gsm
-When rolling two six-sided dice, you should expect to roll a 5 about one roll in every how many rolls?
+When rolling 2 six-sided dice, you should expect to roll a 5 about one roll in every how many rolls?
 
 11.gsm
 What is 42 in binary?
@@ -38,10 +38,10 @@ How many prime numbers are there between 100 and 1000?
 What is the XOR of your phone number and the phone number you called?
 
 14.gsm
-What is the first 9-digit prime palindrome in pi?
+What is the first 9 digit prime palindrome in pi?
 
 15.gsm
-Consider the shape of a binary tree.  A tree of 2 nodes can have two shapes: left-leaning and right-leaning.  A tree of 3 nodes can have 5 shapes: left-left, left-right, balanced, right-left, and right-right.  A tree of 4 nodes can have 14 shapes.  How many shapes can a tree of 10 nodes have?
+Consider the shape of a binary tree.  A tree of 2 nodes can have two shapes left leaning and right leaning.  A tree of 3 nodes can have 5 shapes left left, left right, balanced, right left, and right right.  A tree of 4 nodes can have 14 shapes.  How many shapes can a tree of 10 nodes have?
 
 error.gsm
 I'm sorry, but we've encountered an internal error.  Sorry!  Please call back again in a few minutes.
@@ -60,9 +60,9 @@ Press 1 to accept, or 2 to reenter.
 
 welcome.gsm
 Welcome to the Marchex University of Washington Career Fair quiz!
-Each question will have be multiple choice or have numeric answers, and the questions will get progressively more difficult.
+Each question will be multiple choice or have numeric answers, and the questions will get progressively more difficult.
 Answer each question by using the keypad on your phone, followed by the pound sign.
-At any time you may hang up to research or work out the solution.  When you call back, it will resume where you left off.
+At any time you may hang up to research or work out the solution.  When you call back, the quiz will resume where you left off.
 You must always use the phone you registered with to maintain your progress.
 Check the leaderboard at u w dot make history dot com.
 

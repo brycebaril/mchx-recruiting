@@ -34,10 +34,10 @@ function useTemplate(response, template, context, contentType) {
 
 var questions = [
     {},
-    { text: 'Multiple choice: What is your favorite programming language? (1) C++ (2) Java (3) perl (4) Python (5) Ruby (6) Haskell (7) Erlang (8) Bourne Shell (9) Other',
+    { text: 'Multiple choice: What is your favorite programming language? 1 C plus plus 2 Java 3 Perl 4 Python 5 Ruby 6 Haskell 7 Erlang 8 Bourne Shell 9 Other',
       answer: function(given) { return true; }
     },
-    { text: 'About how many University of Washington Computer Science and Engineering undergraduate students graduate each year: 50, 100, 160, or 250?',
+    { text: 'About how many University of Washington Computer Science and Engineering undergraduate students graduate each year 50 100 160 or 250?',
       answer: '160'
     },
     { text: 'How many bits are there in a byte?',
@@ -61,7 +61,7 @@ var questions = [
     { text: 'In what year will the Unix epoch time exceed 32 bits?',
       answer: '2038'
     },
-    { text: 'When rolling two six-sided dice, you should expect to roll a total of 5 about one roll in every how many rolls?',
+    { text: 'When rolling 2 six-sided dice, you should expect to roll a total of 5 about one roll in every how many rolls?',
       answer: '9'
     },
     { text: 'What is 42 in binary?',
@@ -73,10 +73,10 @@ var questions = [
     { text: 'What is the XOR of your phone number and the phone number you called?',
       answer: function(given, caller) { return given == (caller ^ 1234567890); }
     },
-    { text: 'What is the first 9-digit prime palindrome in pi?',
+    { text: 'What is the first 9 digit prime palindrome in pi?',
       answer: '318272813'
     },
-    { text: 'Consider the shape of a binary tree.  A tree of 2 nodes can have two shapes: left-leaning and right-leaning.  A tree of 3 nodes can have 5 shapes: left-left, left-right, balanced, right-left, and right-right.  A tree of 4 nodes can have 14 shapes.  How many shapes can a tree of 10 nodes have?',
+    { text: 'Consider the shape of a binary tree.  A tree of 2 nodes can have two shapes left leaning and right leaning.  A tree of 3 nodes can have 5 shapes left left, left right, balanced, right left, and right right.  A tree of 4 nodes can have 14 shapes.  How many shapes can a tree of 10 nodes have?',
       answer: '16796'
     }
 ];
