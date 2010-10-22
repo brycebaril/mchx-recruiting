@@ -125,6 +125,67 @@ function redirect(response, location, args) {
     response.end();
 }
 
+function handleQuestion(request, response, args) {
+    if (!args.caller) {
+        useTemplate(response, 'vxml/no_caller_id', {});
+        return;
+    }
+    rclient.mget("quiz:" + args.caller + ":name",
+                 "quiz:" + args.caller + ":number",
+                 "quiz:" + args.caller + ":email",
+                 "quiz:" + args.caller + ":current_question",
+                 function(err, replies) {
+        if (err) {
+            useTemplate(response, 'vxml/vxml_error', {});
+            return;
+        }
+        var name     = replies[0];
+        var number   = replies[1];
+        var email    = replies[2];
+        var question = replies[3];
+        if (number != args.caller) {
+            sys.log("Unregistered caller " + args.caller);
+            useTemplate(response, 'vxml/not_registered', {});
+            return;
+        }
+        var template = 'vxml/question';
+        var correct = false;
+        if (question == 0) {
+            sys.log("Playing welcome for caller " + args.caller);
+            template = 'vxml/welcome';
+            correct = true;
+            return;
+        }
+        if (questions[question] && args.answer !== undefined) {
+            template = 'vxml/answer';
+            if (typeof questions[question].answer == 'function') {
+                correct = questions[question].answer(args.answer, args.caller);
+            }
+            else {
+                correct = args.answer == questions[question].answer;
+            }
+            sys.log("Grading question " + question + " for caller " + args.caller + ": " + correct);
+        }
+        if (correct) {
+            rclient.incr("quiz:" + args.caller + ":current_question");
+            question = Math.floor(question) + 1;
+        }
+        if (!questions[question]) {
+            template = 'vxml/finish';
+            sys.log("Playing finish for caller " + args.caller);
+        }
+        else {
+            sys.log("Serving question " + question + " for caller " + args.caller);
+        }
+        var score = 0;
+        useTemplate(response, template, { caller: args.caller, name: name,
+                                          position: score,
+                                          answer_status: correct, answer_status_tts: answer_text[correct],
+                                          question: question, fallback_tts: questions[question].text,
+                                          nocache: Math.floor(Math.random() * 1000000) });
+    });
+}
+
 var postRoutes = {
     '/' : function(request, response, args) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
@@ -172,90 +233,8 @@ var postRoutes = {
         response.write("Call from " + args.caller_name + " <"+ args.caller_number + "> (calling: " + args.called_number + ") complete.  Status: " + args.call_status);
         response.end();
     },
-    '/vxml/question' : function(request, response, args) {
-        if (!args.caller) {
-            useTemplate(response, 'vxml/no_caller_id', {});
-            return;
-        }
-        rclient.mget("quiz:" + args.caller + ":name",
-                     "quiz:" + args.caller + ":number",
-                     "quiz:" + args.caller + ":email",
-                     "quiz:" + args.caller + ":current_question",
-                     function(err, replies) {
-            if (err) {
-                useTemplate(response, 'vxml/vxml_error', {});
-                return;
-            }
-            var name     = replies[0];
-            var number   = replies[1];
-            var email    = replies[2];
-            var question = replies[3];
-            if (number != args.caller) {
-	        sys.log("Unregistered caller " + args.caller);
-                useTemplate(response, 'vxml/not_registered', {});
-                return;
-            }
-            sys.log("Serving question " + question + " for caller " + args.caller);
-            if (question == 0) {
-                useTemplate(response, 'vxml/welcome', { caller: args.caller, name: name, nocache: Math.floor(Math.random() * 1000000) });
-                rclient.incr("quiz:" + args.caller + ":current_question");
-                return;
-            }
-            if (questions[question]) {
-                useTemplate(response, 'vxml/question', { caller: args.caller, name: name, question: question, fallback_tts: questions[question].text, nocache: Math.floor(Math.random() * 1000000) });
-                return;
-            }
-            useTemplate(response, 'vxml/finish', { caller: args.caller, name: name, position: score, nocache: Math.floor(Math.random() * 1000000) });
-        });
-    },
-    '/vxml/answer' : function(request, response, args) {
-        if (!args.caller) {
-            useTemplate(response, 'vxml/no_caller_id', {});
-            return;
-        }
-        rclient.mget("quiz:" + args.caller + ":name",
-                     "quiz:" + args.caller + ":number",
-                     "quiz:" + args.caller + ":email",
-                     "quiz:" + args.caller + ":current_question",
-                     function(err, replies) {
-            if (err) {
-                useTemplate(response, 'vxml/vxml_error', {});
-                return;
-            }
-            var name     = replies[0];
-            var number   = replies[1];
-            var email    = replies[2];
-            var question = replies[3];
-            if (number != args.caller) {
-	        sys.log("Unregistered caller " + args.caller);
-                useTemplate(response, 'vxml/not_registered', {});
-                return;
-            }
-            if (!questions[question] || !args.answer) {
-                useTemplate(response, 'vxml/vxml_error', {});
-                return;
-            }
-            var correct = false;
-            if (typeof questions[question].answer == 'function') {
-                correct = questions[question].answer(args.answer, args.caller);
-            }
-            else {
-                correct = args.answer == questions[question].answer;
-            }
-            sys.log("Grading question " + question + " for caller " + args.caller + ": " + correct);
-            if (correct) {
-                rclient.incr("quiz:" + args.caller + ":current_question");
-                question = Math.floor(question) + 1;
-            }
-            if (questions[question]) {
-                useTemplate(response, 'vxml/answer', { caller: args.caller, name: name, answer_status: correct, answer_status_tts: answer_text[correct],
-                                                       question: question, fallback_tts: questions[question].text, nocache: Math.floor(Math.random() * 1000000) });
-                return;
-            }
-            var score = 0;
-            useTemplate(response, 'vxml/finish', { caller: args.caller, name: name, position: score, nocache: Math.floor(Math.random() * 1000000) });
-        });
-    },
+    '/vxml/question' : function(request, response, args) { handleQuestion(request, response, args); },
+    '/vxml/answer'   : function(request, response, args) { handleQuestion(request, response, args); },
     '/vxml' : function(request, response, args) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end('vxml placeholder');
