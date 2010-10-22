@@ -9,5 +9,5 @@
     <goto next="#question"/>
 </block>
 </form>
-{{>question_form}}
+{{>vxml/question_form}}
 </vxml>

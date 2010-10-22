@@ -15,14 +15,71 @@ var webport = 8080;
 var wsserver = ws.createServer();
 var rclient = redis.createClient();
 
-function useTemplate(response, template, context) {
+function useTemplate(response, template, context, contentType) {
+    if (!contentType) {
+        if (template.match(/^vxml/)) {
+            contentType = 'text/plain';
+        }
+        else {
+            contentType = 'text/html';
+        }
+    }
     mu.render(template, context, {}, function(err, output) {
         if (err) { throw err; }
-        response.writeHead(200, {'Content-Type': 'text/html'});
+        response.writeHead(200, {'Content-Type': contentType});
         output.addListener('data', function(c) { response.write(c); });
         output.addListener('end',  function()  { response.end();    });
     });
 }
+
+var questions = [
+    {},
+    { text: 'Multiple choice: What is your favorite programming language? (1) C++ (2) Java (3) perl (4) Python (5) Ruby (6) Haskell (7) Erlang (8) Bourne Shell (9) Other',
+      answer: function(given) { return true; }
+    },
+    { text: 'Spell the word "telephony" on your telephone keypad.',
+      answer: '835374669'
+    },
+    { text: 'How many bits are there in a byte?',
+      answer: '8'
+    },
+    { text: 'How many minutes are there in a typical day?',
+      answer: '1440'
+    },
+    { text: 'What are the first 9 digits of pi?',
+      answer: '314159265'
+    },
+    { text: 'How many volumes of The Art of Computer Programming were published before 1990?',
+      answer: '3'
+    },
+    { text: 'Spell the name of the company running this contest on your telephone keypad.',
+      answer: '6272439'
+    },
+    { text: 'In what year will the Unix epoch time exceed 32 bits?',
+      answer: '2038'
+    },
+    { text: 'How many bits are there in a Java long?',
+      answer: '64'
+    },
+    { text: 'What is the XOR of your phone number and the phone number you called?',
+      answer: function(given, caller) { return given == (caller ^ 1234567890); }
+    },
+    { text: 'How many rooms are there on the Hunt the Wumpus map?',
+      answer: '20'
+    },
+    { text: 'How many  are there in a typical game of Reversi or Othello?',
+      answer: '60'
+    },
+    { text: 'From the Marchex brochures, how many billions of calls are made annually in the United States?',
+      answer: '23'
+    },
+    { text: 'What is the first 9-digit prime palindrome in pi?',
+      answer: '318272813'
+    },
+    { text: 'Consider the shape of a binary tree.  A tree of 2 nodes can have two shapes: left-leaning and right-leaning.  A tree of 3 nodes can have 5 shapes: left-left, left-right, balanced, right-left, and right-right.  A tree of 4 nodes can have 14 shapes.  How many shapes can a tree of 10 nodes have?',
+      answer: '16796'
+    }
+];
 
 var getRoutes = {
     '/' : function(request, response) {
@@ -115,9 +172,9 @@ var postRoutes = {
             useTemplate(response, 'vxml/no_caller_id', {});
             return;
         }
-        rclient.mget("quiz:" + args.caller + ":name", 
-                     "quiz:" + args.caller + ":number", 
-                     "quiz:" + args.caller + ":email", 
+        rclient.mget("quiz:" + args.caller + ":name",
+                     "quiz:" + args.caller + ":number",
+                     "quiz:" + args.caller + ":email",
                      "quiz:" + args.caller + ":current_question",
                      function(err, replies) {
             if (err) {
@@ -129,17 +186,21 @@ var postRoutes = {
             var email    = replies[2];
             var question = replies[3];
             if (number != args.caller) {
+	        sys.log("Unregistered caller " + args.caller);
                 useTemplate(response, 'vxml/not_registered', {});
                 return;
             }
+            sys.log("Serving question " + question + " for caller " + args.caller);
             if (question == 0) {
-                useTemplate(response, 'vxml/welcome', { name: name });
+                useTemplate(response, 'vxml/welcome', { name: name, nocache: Math.floor(Math.random() * 1000000) });
                 rclient.incr("quiz:" + args.caller + ":current_question");
                 return;
             }
-            if (answers[question]) {
-                useTemplate(response, 'vxml/question', { name: name, question: question, nocache: Math.floor(Math.random() * 1000000) });
+            if (questions[question]) {
+                useTemplate(response, 'vxml/question', { name: name, question: question, fallback_tts: questions[question].text, nocache: Math.floor(Math.random() * 1000000) });
+                return;
             }
+            useTemplate(response, 'vxml/finish', { name: name, position: score, nocache: Math.floor(Math.random() * 1000000) });
         });
     },
     '/vxml/answer' : function(request, response, args) {
@@ -147,9 +208,9 @@ var postRoutes = {
             useTemplate(response, 'vxml/no_caller_id', {});
             return;
         }
-        rclient.mget("quiz:" + args.caller + ":name", 
-                     "quiz:" + args.caller + ":number", 
-                     "quiz:" + args.caller + ":email", 
+        rclient.mget("quiz:" + args.caller + ":name",
+                     "quiz:" + args.caller + ":number",
+                     "quiz:" + args.caller + ":email",
                      "quiz:" + args.caller + ":current_question",
                      function(err, replies) {
             if (err) {
@@ -161,17 +222,32 @@ var postRoutes = {
             var email    = replies[2];
             var question = replies[3];
             if (number != args.caller) {
+	        sys.log("Unregistered caller " + args.caller);
                 useTemplate(response, 'vxml/not_registered', {});
                 return;
             }
-            if (question == 0) {
-                useTemplate(response, 'vxml/welcome', { name: name });
-                rclient.incr("quiz:" + args.caller + ":current_question");
+            if (!questions[question] || !args.answer) {
+                useTemplate(response, 'vxml/vxml_error', {});
                 return;
             }
-            if (answers[question]) {
-                useTemplate(response, 'vxml/question', { name: name, question: question, nocache: Math.floor(Math.random() * 1000000) });
+            var correct = false;
+            if (typeof questions[question].answer == 'function') {
+                correct = questions[question].answer(args.answer, args.caller);
             }
+            else {
+                correct = args.answer == questions[question].answer;
+            }
+            sys.log("Grading question " + question + " for caller " + args.caller + ": " + correct);
+            if (correct) {
+                rclient.incr("quiz:" + args.caller + ":current_question");
+                question = question + 1;
+            }
+            if (questions[question]) {
+                useTemplate(response, 'vxml/answer', { name: name, answer_status: correct, answer_status_tts: answer_text[correct],
+                                                       question: question, fallback_tts: questions[question].text, nocache: Math.floor(Math.random() * 1000000) });
+                return;
+            }
+            useTemplate(response, 'vxml/finish', { name: name, position: score, nocache: Math.floor(Math.random() * 1000000) });
         });
     },
     '/vxml' : function(request, response, args) {
@@ -204,22 +280,6 @@ var webserver = http.createServer(function (request, response) {
         else {
             post_handler(request, function(request_data) { postRoutes[pathname].call(this, request, response, request_data) });
         }
-//        
-//        post_handler(request, function(request_data) {
-//            response.writeHead(200, {
-//                "Content-Type": "text/plain"
-//            });
-//            response.write("Call from " + request_data.caller_name + " <"+ request_data.caller_number + "> (calling: " + request_data.called_number + ") complete.  Status: " + request_data.call_status);
-//            response.end();
-//            sys.log("POST-a-licious");
-//            // incr for vote, then broadcast new counts
-//            if (request_data.call_status) {
-//                wsserver.broadcast("Call from " + request_data.caller_name + " <"+ request_data.caller_number + "> (calling: " + request_data.called_number + ") complete.  Status: " + request_data.call_status);
-//            }
-//            else {
-//                wsserver.broadcast("Incoming call from: " + request_data.caller_number + " (calling: " + request_data.called_number + ") acc/cmp: " + request_data.acc + "/" + request_data.cmp);
-//            }
-//        });
     }
     else if (request.method == 'GET') {
         // send vxml

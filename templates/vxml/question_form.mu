@@ -22,7 +22,7 @@
     <if cond="!ok">
     <else/>
         <submit next="http://uw.makehistory.com/vxml/answer"
-            method="get"
+            method="post"
             namelist="question answer caller nocache"/>
     </if>
 </field>
