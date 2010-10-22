@@ -4,7 +4,7 @@
 <var nocache = "{{nocache}}"/>
 <field name="answer" type="digits">
     <prompt>
-        <audio src="http://uw.makehistory.com/audio/{{quesiton}}.gsm">
+        <audio src="http://uw.makehistory.com/audio/{{question}}.gsm">
         {{fallback_tts}}
         </audio>
     </prompt>

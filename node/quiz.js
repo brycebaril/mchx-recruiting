@@ -42,7 +42,7 @@ var getRoutes = {
         response.end();
     },
     '/register' : function(request, response) {
-        useTemplate(response, 'register', {});
+        useTemplate(response, 'html/register', {});
     },
     '/vxml' : function(request, response) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
@@ -78,16 +78,16 @@ var postRoutes = {
         if (!args.caller_number.match(/^\d\d\d\d\d\d\d\d\d\d$/)) { errors.push({message: "You must specify a 10-digit phone number including area code."}); }
         if (!args.caller_email .match(/^[^@, ]+@[^@, ]+$/))      { errors.push({message: "You must specify a valid email address."                      }); }
         if (errors.length > 0) {
-            useTemplate(response, 'register', {errors: errors});
+            useTemplate(response, 'html/register', {errors: errors});
             return;
         }
         rclient.getset("quiz:" + args.caller_number + ":active", "true", function(err, reply) {
             if (err) {
-                useTemplate(response, 'register', {errors: {message: "There was an error storing your data.  Please try again."}});
+                useTemplate(response, 'html/register', {errors: {message: "There was an error storing your data.  Please try again."}});
                 return;
             }
             if (reply == "true") {
-                useTemplate(response, 'register', {errors: {message: "That phone number is already in use.  Please try another."}});
+                useTemplate(response, 'html/register', {errors: {message: "That phone number is already in use.  Please try another."}});
                 return;
             }
             rclient.mset("quiz:" + args.caller_number + ":name",             args.caller_name,
@@ -96,10 +96,10 @@ var postRoutes = {
                          "quiz:" + args.caller_number + ":current_question", 0,
                          function(err, reply) {
                 if (err) {
-                    useTemplate(response, 'register', {errors: {message: "There was an error storing your data.  Please try again."}});
+                    useTemplate(response, 'html/register', {errors: {message: "There was an error storing your data.  Please try again."}});
                     return;
                 }
-                useTemplate(response, 'register', {success: {message: "Thank you for registering."}});
+                useTemplate(response, 'html/register', {success: {message: "Thank you for registering."}});
             });
         });
     },
@@ -111,12 +111,68 @@ var postRoutes = {
         response.end();
     },
     '/vxml/question' : function(request, response, args) {
-        response.writeHead(200, {'Content-Type': 'text/plain'});
-        response.write("User-agent: discobot\n");
-        response.write("Disallow: /\n");
-        response.write("User-agent: *\n");
-        response.write("Disallow: /\n");
-        response.end();
+        if (!args.caller) {
+            useTemplate(response, 'vxml/no_caller_id', {});
+            return;
+        }
+        rclient.mget("quiz:" + args.caller + ":name", 
+                     "quiz:" + args.caller + ":number", 
+                     "quiz:" + args.caller + ":email", 
+                     "quiz:" + args.caller + ":current_question",
+                     function(err, replies) {
+            if (err) {
+                useTemplate(response, 'vxml/vxml_error', {});
+                return;
+            }
+            var name     = replies[0];
+            var number   = replies[1];
+            var email    = replies[2];
+            var question = replies[3];
+            if (number != args.caller) {
+                useTemplate(response, 'vxml/not_registered', {});
+                return;
+            }
+            if (question == 0) {
+                useTemplate(response, 'vxml/welcome', { name: name });
+                rclient.incr("quiz:" + args.caller + ":current_question");
+                return;
+            }
+            if (answers[question]) {
+                useTemplate(response, 'vxml/question', { name: name, question: question, nocache: Math.floor(Math.random() * 1000000) });
+            }
+        });
+    },
+    '/vxml/answer' : function(request, response, args) {
+        if (!args.caller) {
+            useTemplate(response, 'vxml/no_caller_id', {});
+            return;
+        }
+        rclient.mget("quiz:" + args.caller + ":name", 
+                     "quiz:" + args.caller + ":number", 
+                     "quiz:" + args.caller + ":email", 
+                     "quiz:" + args.caller + ":current_question",
+                     function(err, replies) {
+            if (err) {
+                useTemplate(response, 'vxml/vxml_error', {});
+                return;
+            }
+            var name     = replies[0];
+            var number   = replies[1];
+            var email    = replies[2];
+            var question = replies[3];
+            if (number != args.caller) {
+                useTemplate(response, 'vxml/not_registered', {});
+                return;
+            }
+            if (question == 0) {
+                useTemplate(response, 'vxml/welcome', { name: name });
+                rclient.incr("quiz:" + args.caller + ":current_question");
+                return;
+            }
+            if (answers[question]) {
+                useTemplate(response, 'vxml/question', { name: name, question: question, nocache: Math.floor(Math.random() * 1000000) });
+            }
+        });
     },
     '/vxml' : function(request, response, args) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
