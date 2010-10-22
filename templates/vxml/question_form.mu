@@ -16,7 +16,7 @@
         </audio>
         <value expr="answer"/>
         <audio src="http://uw.makehistory.com/audio/press_1.gsm">
-        Press 1 to accept, 2 to reenter.
+        Press 1 to accept, or 2 to reenter.
         </audio>
     </prompt>
     <if cond="!ok">

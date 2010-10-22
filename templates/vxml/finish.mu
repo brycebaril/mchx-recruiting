@@ -4,8 +4,9 @@
 <form id="congrats">
 <block>
     <audio src="http://uw.makehistory.com/audio/congrats.gsm">
-    Congratulations! You have answered all questions correctly. You finished in {{position}} place. Goodbye.
+    Congratulations! You have answered all questions correctly.
     </audio>
+    You finished in {{position}} place. Goodbye.
     </exit>
 </block>
 </form>
