@@ -1,7 +1,7 @@
 Q: Multiple choice: What is your favorite programming language? (1) C++ (2) Java (3) Perl (4) Python (5) Ruby (6) Haskell (7) Erlang (8) Bourne Shell (9) Other
 A: all answers correct, this is just for amusement
 
-Q: About how many University of Washington Computer Science and Engineering studends graduate per year 50, 100, 160, 250?
+Q: About how many University of Washington Computer Science and Engineering undergraduate students graduate each year: 50, 100, 160, or 250?
 A: 160
 
 Q: How many bits are there in a byte?
@@ -25,7 +25,7 @@ A: 404
 Q: In what year will the Unix epoch time exceed 32 bits?
 A: 2038
 
-Q: When rolling two dice, you should expect to roll a 5 about one roll in every ...
+Q: When rolling two six-sided dice, you should expect to roll a 5 about one roll in every how many rolls?
 A: 9
 
 Q: What is 42 in binary?

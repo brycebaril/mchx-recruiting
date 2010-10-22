@@ -37,11 +37,17 @@ var questions = [
     { text: 'Multiple choice: What is your favorite programming language? (1) C++ (2) Java (3) perl (4) Python (5) Ruby (6) Haskell (7) Erlang (8) Bourne Shell (9) Other',
       answer: function(given) { return true; }
     },
-    { text: 'Spell the word "telephony" on your telephone keypad.',
-      answer: '835374669'
+    { text: 'About how many University of Washington Computer Science and Engineering undergraduate students graduate each year: 50, 100, 160, or 250?',
+      answer: '160'
     },
     { text: 'How many bits are there in a byte?',
       answer: '8'
+    },
+    { text: 'Spell the name of the company running this contest on your telephone keypad.',
+      answer: '6272439'
+    },
+    { text: 'How many bits are there in a Java long?',
+      answer: '64'
     },
     { text: 'How many minutes are there in a typical day?',
       answer: '1440'
@@ -49,29 +55,23 @@ var questions = [
     { text: 'What are the first 9 digits of pi?',
       answer: '314159265'
     },
-    { text: 'How many volumes of The Art of Computer Programming were published before 1990?',
-      answer: '3'
-    },
-    { text: 'Spell the name of the company running this contest on your telephone keypad.',
-      answer: '6272439'
+    { text: 'What is the HTTP error code for File Not Found?',
+      answer: '404'
     },
     { text: 'In what year will the Unix epoch time exceed 32 bits?',
       answer: '2038'
     },
-    { text: 'How many bits are there in a Java long?',
-      answer: '64'
+    { text: 'When rolling two six-sided dice, you should expect to roll a total of 5 about one roll in every how many rolls?',
+      answer: '9'
+    },
+    { text: 'What is 42 in binary?',
+      answer: '101010'
+    },
+    { text: 'How many prime numbers are there between 100 and 1000?',
+      answer: '143'
     },
     { text: 'What is the XOR of your phone number and the phone number you called?',
       answer: function(given, caller) { return given == (caller ^ 1234567890); }
-    },
-    { text: 'How many rooms are there on the Hunt the Wumpus map?',
-      answer: '20'
-    },
-    { text: 'How many  are there in a typical game of Reversi or Othello?',
-      answer: '60'
-    },
-    { text: 'From the Marchex brochures, how many billions of calls are made annually in the United States?',
-      answer: '23'
     },
     { text: 'What is the first 9-digit prime palindrome in pi?',
       answer: '318272813'
