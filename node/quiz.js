@@ -130,11 +130,9 @@ function handleQuestion(request, response, args) {
         useTemplate(response, 'vxml/no_caller_id', {});
         return;
     }
-    rclient.mget("quiz:" + args.caller + ":name",
-                 "quiz:" + args.caller + ":number",
-                 "quiz:" + args.caller + ":email",
-                 "quiz:" + args.caller + ":current_question",
-                 function(err, replies) {
+    rclient.hmget("quiz:" + args.caller,
+                  "name", "number", "email", "question",
+                  function(err, replies) {
         if (err) {
             useTemplate(response, 'vxml/vxml_error', {});
             return;
@@ -154,7 +152,6 @@ function handleQuestion(request, response, args) {
             sys.log("Playing welcome for caller " + args.caller);
             template = 'vxml/welcome';
             correct = true;
-            return;
         }
         if (questions[question] && args.answer !== undefined) {
             template = 'vxml/answer';
@@ -167,8 +164,8 @@ function handleQuestion(request, response, args) {
             sys.log("Grading question " + question + " for caller " + args.caller + ": " + correct);
         }
         if (correct) {
-            rclient.incr("quiz:" + args.caller + ":current_question");
             question = Math.floor(question) + 1;
+            rclient.hset("quiz:" + args.caller, "question", question);
         }
         if (!questions[question]) {
             template = 'vxml/finish';
@@ -213,16 +210,18 @@ var postRoutes = {
                 useTemplate(response, 'html/register', {errors: {message: "That phone number is already in use.  Please try another."}});
                 return;
             }
-            rclient.mset("quiz:" + args.caller_number + ":name",             args.caller_name,
-                         "quiz:" + args.caller_number + ":number",           args.caller_number,
-                         "quiz:" + args.caller_number + ":email",            args.caller_email,
-                         "quiz:" + args.caller_number + ":current_question", 0,
-                         function(err, reply) {
+            rclient.hmset("quiz:" + args.caller_number,
+                          "name",     args.caller_name,
+                          "number",   args.caller_number,
+                          "email",    args.caller_email,
+                          "question", 0,
+                          function(err, reply) {
                 if (err) {
                     useTemplate(response, 'html/register', {errors: {message: "There was an error storing your data.  Please try again."}});
                     return;
                 }
                 useTemplate(response, 'html/register', {success: {message: "Thank you for registering."}});
+                sys.log("Registered " + args.caller_number + " for " + args.caller_name + " with email " + args.caller_email);
             });
         });
     },

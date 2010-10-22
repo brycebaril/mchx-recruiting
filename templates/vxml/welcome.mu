@@ -4,13 +4,12 @@
 <var nocache = "{{nocache}}"/>
 <form id="sorry">
 <block>
-    <audio src="http://uw.makehistory.com/audio/welcome.gsm">
     Hello, {{name}}.
+    <audio src="http://uw.makehistory.com/audio/welcome.gsm">
     This is just filler text.  We should tell people how to play.  It would be nice.
     </audio>
-    <submit next="http://uw.makehistory.com/vxml/question"
-            method="post"
-            namelist="caller nocache"/>
+    <goto next="#question"/>
 </block>
 </form>
+{{>vxml/question_form}}
 </vxml>
