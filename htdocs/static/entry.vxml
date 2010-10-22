@@ -20,13 +20,12 @@ var caller = undefined;
 <form id="entry">
 <block>
     <if cond='caller == undefined || caller == ""'>
-        <audio src="http://spug.brycebaril.com/misc/nuts.gsm">
-        I'm sorry, I was not able to see your caller i d.  Perhaps you were blocking it?
+        <audio src="http://uw.makehistory.com/audio/sorry.gsm">
+        I'm sorry, I was not able to see your caller i d.  Perhaps you were blocking it? Goodbye.
         </audio>
-        Goodbye
         <exit/>
     <else/>
-        <submit next="http://vswww3.devint.marchex.com/vxml/customapps/bb.vxml"
+        <submit next="http://uw.makehistory.com/vxml/question"
             method="get"
             namelist="caller nocache"/>
     </if>
