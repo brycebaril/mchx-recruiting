@@ -164,19 +164,42 @@ function handleQuestion(request, response, args) {
             sys.log("Grading question " + question + " for caller " + args.caller + ": " + correct);
         }
         if (correct) {
+            var old = question;
             question = Math.floor(question) + 1;
             rclient.hset("quiz:" + args.caller, "question", question);
+            rclient.incr("quiz:correct:" + old, function(err, reply) {
+                var score = question * 1000000 - reply;
+                sys.log("Setting score for caller " + args.caller + " to " + score);
+                rclient.zadd("quiz:score", score, args.caller, function(err, reply) {
+                    handleQuestion2(request, response, args, name, number, email, question, template, correct);
+                });
+            });
+        } else {
+            handleQuestion2(request, response, args, name, number, email, question, template, correct);
         }
-        if (!questions[question]) {
-            template = 'vxml/finish';
-            sys.log("Playing finish for caller " + args.caller);
+    });
+}
+
+// How I wish for callWithCurrentContinuation
+function handleQuestion2(request, response, args, name, number, email, question, template, correct) {
+    if (!questions[question]) {
+        template = 'vxml/finish';
+        sys.log("Playing finish for caller " + args.caller);
+    }
+    else {
+        sys.log("Serving question " + question + " for caller " + args.caller);
+    }
+
+    rclient.zrevrank("quiz:score", args.caller, function(err, reply) {
+        if (reply === null) {
+            reply = "last";
         }
         else {
-            sys.log("Serving question " + question + " for caller " + args.caller);
+            reply = Math.floor(reply) + 1;
         }
-        var score = 0;
+        sys.log("position: " + reply);
         useTemplate(response, template, { caller: args.caller, name: name,
-                                          position: score,
+                                          position: reply,
                                           answer_status: correct, answer_status_tts: answer_text[correct],
                                           question: question, fallback_tts: questions[question].text,
                                           nocache: Math.floor(Math.random() * 1000000) });
@@ -218,10 +241,14 @@ var postRoutes = {
                           function(err, reply) {
                 if (err) {
                     useTemplate(response, 'html/register', {errors: {message: "There was an error storing your data.  Please try again."}});
+                    rclient.del("quiz:" + args.caller_number + ":active");
                     return;
                 }
                 useTemplate(response, 'html/register', {success: {message: "Thank you for registering."}});
                 sys.log("Registered " + args.caller_number + " for " + args.caller_name + " with email " + args.caller_email);
+                rclient.zcount("quiz:score", -100000000, 100000000, function(err, reply) {
+                    rclient.zadd("quiz:score", -reply, args.caller_number);
+                });
             });
         });
     },
