@@ -81,6 +81,11 @@ var questions = [
     }
 ];
 
+var answer_text = {
+    true:  "That is correct.",
+    false: "That is not correct."
+};
+
 var getRoutes = {
     '/' : function(request, response) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
