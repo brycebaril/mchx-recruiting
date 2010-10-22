@@ -1,11 +1,17 @@
-Q: Multiple choice: What is your favorite programming language? (1) C++ (2) Java (3) perl (4) Python (5) Ruby (6) Haskell (7) Erlang (8) Bourne Shell (9) Other
+Q: Multiple choice: What is your favorite programming language? (1) C++ (2) Java (3) Perl (4) Python (5) Ruby (6) Haskell (7) Erlang (8) Bourne Shell (9) Other
 A: all answers correct, this is just for amusement
 
-Q: Spell the word "telephony" on your telephone keypad.
-A: 835374669
+Q: About how many University of Washington Computer Science and Engineering studends graduate per year 50, 100, 160, 250?
+A: 160
 
 Q: How many bits are there in a byte?
 A: 8
+
+Q: Spell the name of the company running this contest on your telephone keypad.
+A: 6272439
+
+Q: How many bits are there in a Java long?
+A: 64
 
 Q: How many minutes are there in a typical day?
 A: 1440
@@ -13,33 +19,26 @@ A: 1440
 Q: What are the first 9 digits of pi?
 A: 314159265
 
-Q: How many volumes of The Art of Computer Programming were published before 1980?
-A: 3
-
-Q: Spell the name of the company running this contest on your telephone keypad.
-A: 6272439
+Q: What is the HTTP error code for File Not Found?
+A: 404
 
 Q: In what year will the Unix epoch time exceed 32 bits?
 A: 2038
 
-Q: How many bits are there in a Java long?
-A: 64
+Q: When rolling two dice, you should expect to roll a 5 about one roll in every ...
+A: 9
+
+Q: What is 42 in binary?
+A: 101010
+
+Q: How many prime numbers are there between 100 and 1000?
+A: 143
 
 Q: What is the XOR of your phone number and the phone number you called?
 A: computed
-
-Q: How many rooms are there on the Hunt the Wumpus map?
-A: 20
-
-Q: How many moves are there in a typical game of Reversi or Othello?
-A: 60  (it's possible to end early, but very rare)
-
-Q: From the Marchex brochures, how many billions of calls are made annually in the United States?
-A: 23
 
 Q: What is the first 9-digit prime palindrome in pi?
 A: 318272813
 
 Q: Consider the shape of a binary tree.  A tree of 2 nodes can have two shapes: left-leaning and right-leaning.  A tree of 3 nodes can have 5 shapes: left-left, left-right, balanced, right-left, and right-right.  A tree of 4 nodes can have 14 shapes.  How many shapes can a tree of 10 nodes have?
 A: 16796
-
