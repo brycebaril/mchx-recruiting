@@ -3,6 +3,8 @@
 <var name="caller" expr="{{caller}}"/>
 <var name="nocache" expr="{{nocache}}"/>
 <field name="answer" type="digits">
+    <property name="interdigittimeout" value="20s"/>
+    <property name="termtimeout" value="20s"/>
     <prompt>
         <audio src="http://uw.makehistory.com/audio/{{question}}.gsm">
         {{fallback_tts}}
@@ -10,6 +12,8 @@
     </prompt>
 </field>
 <field name="ok" type="boolean">
+    <property name="interdigittimeout" value="1s"/>
+    <property name="termtimeout" value="2s"/>
     <prompt>
         <audio src="http://uw.makehistory.com/audio/you_entered.gsm">
         You entered

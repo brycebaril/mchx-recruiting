@@ -21,7 +21,7 @@
   </form>
     Notes: YES, this will be styled and beautified prior to the contest.
     <br/>
-    The phone number you enter is used to track your progress, and much match the number you call from.
+    The phone number you enter is used to track your progress, and must match the number you call from.
     <br/>
-    The call in number for the quiz is: (800) 724-4683
+    The call-in number for the quiz is: (800) 724-4683
 </body>

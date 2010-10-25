@@ -34,8 +34,8 @@ What is 42 in binary?
 12.gsm - Will
 How many prime numbers are there between 100 and 1000?
 
-13.gsm - Will
-What is the XOR of your phone number and the phone number you called?
+13.gsm - Bryce
+What is the bitwise XOR of the last four digits of your phone number and the last four digits of the phone number you called?
 
 14.gsm - Dave
 What is the first 9 digit prime palindrome in pi?
