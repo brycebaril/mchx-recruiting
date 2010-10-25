@@ -12,7 +12,7 @@ mu.templateRoot = '../templates';
 var wsport = 8008;
 var webport = 8080;
 
-var inbound_number = 8007244683;
+var inbound_number = "8007244683";
 
 var wsserver = ws.createServer();
 var rclient = redis.createClient();
@@ -72,8 +72,8 @@ var questions = [
     { text: 'How many prime numbers are there between 100 and 1000?',
       answer: '143'
     },
-    { text: 'What is the XOR of your phone number and the phone number you called?',
-      answer: function(given, caller) { return given == (caller ^ inbound_number); }
+    { text: 'What is the bitwise XOR of the last four digits of your phone number and the last four digits of the phone number you called?',
+      answer: function(given, caller) { var xored = caller.substr(-4,4) ^ inbound_number.substr(-4,4); sys.log("expect: " + xored); return given == xored; }
     },
     { text: 'What is the first 9 digit prime palindrome in pi?',
       answer: '318272813'
@@ -240,12 +240,14 @@ function handleQuestion(request, response, args) {
 
 // How I wish for callWithCurrentContinuation
 function handleQuestion2(request, response, args, name, number, email, question, template, correct) {
-    if (!questions[question]) {
+    var fallback = '';
+    if (questions[question] === undefined) {
         template = 'vxml/finish';
         sys.log("Playing finish for caller " + args.caller);
     }
     else {
         sys.log("Serving question " + question + " for caller " + args.caller);
+        fallback = questions[question].text;
     }
 
     rclient.zrevrank("quiz:score", args.caller, function(err, reply) {
@@ -259,7 +261,7 @@ function handleQuestion2(request, response, args, name, number, email, question,
         useTemplate(response, template, { caller: args.caller, name: name,
                                           position: reply,
                                           answer_status: correct, answer_status_tts: answer_text[correct],
-                                          question: question, fallback_tts: questions[question].text,
+                                          question: question, fallback_tts: fallback,
                                           nocache: Math.floor(Math.random() * 1000000) });
     });
 }
