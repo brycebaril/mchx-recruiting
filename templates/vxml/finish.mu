@@ -3,11 +3,13 @@
 
 <form id="congrats">
 <block>
+    <prompt>
     <voice gender="female">
-    This is a triumph. I'm making a note here, huge success.  It's hard to overstate my satisfaction.  You have completed all quesitons.
-    You finished in {{position}} place. Goodbye.
+    This is a triumph. I'm making a note here, huge success.  It's hard to overstate my satisfaction.  You have completed all questions.
+    You finished in position number {{position}}. Goodbye.
     </voice>
-    </exit>
+    </prompt>
+    <exit/>
 </block>
 </form>
 </vxml>

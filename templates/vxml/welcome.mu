@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <vxml version="2.0">
 
-<var nocache = "{{nocache}}"/>
 <form id="sorry">
+<var name="nocache" expr="{{nocache}}"/>
 <block>
     Hello, {{name}}.
     <audio src="http://uw.makehistory.com/audio/welcome.gsm">

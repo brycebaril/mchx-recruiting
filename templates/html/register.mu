@@ -13,10 +13,15 @@
   {{/success}}
   <form method="post" action="/register">
     <table>
-      <tr><th><label for="caller_name"  >Caller name:  </label></th><td><input type="text" id="caller_name"   name="caller_name"  ></td></tr>
-      <tr><th><label for="caller_number">Caller number:</label></th><td><input type="text" id="caller_number" name="caller_number"></td></tr>
-      <tr><th><label for="caller_email" >Caller email: </label></th><td><input type="text" id="caller_email"  name="caller_email" ></td></tr>
+      <tr><th><label for="caller_name"  >Name:  </label></th><td><input type="text" id="caller_name"   name="caller_name"  ></td></tr>
+      <tr><th><label for="caller_number">Phone Number:</label></th><td><input type="text" id="caller_number" name="caller_number"></td></tr>
+      <tr><th><label for="caller_email" >Email: </label></th><td><input type="text" id="caller_email"  name="caller_email" ></td></tr>
       <tr><td>&nbsp;</td><td><input type="submit" id="Submit" name="Submit"></td></tr>
     </table>
   </form>
+    Notes: YES, this will be styled and beautified prior to the contest.
+    <br/>
+    The phone number you enter is used to track your progress, and much match the number you call from.
+    <br/>
+    The call in number for the quiz is: (800) 724-4683
 </body>

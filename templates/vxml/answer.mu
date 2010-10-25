@@ -2,7 +2,8 @@
 <vxml version="2.0">
 
 <property name="timeout" value="4s"/>
-<property name="termtimeout" value="0s"/>
+<property name="termtimeout" value="20s"/>
+<property name="interdigittimeout" value="20s"/>
 <property name="bargein" value="true"/>
 <property name="ttsfetchtimeout" value="10s"/>
 
