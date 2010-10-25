@@ -89,7 +89,7 @@ var answer_text = {
 var getRoutes = {
     '/' : function(request, response) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
-        response.end('placeholder');
+        drawFullScoreboard(response);
     },
     '/ping' : function(request, response) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
@@ -331,7 +331,65 @@ function post_handler(request, callback) {
     }
 }
 
+// draws the full scoreboard page
+function drawFullScoreboard(response) {
+    // needs {scores: [ {name: ..., score: ...}, ]}
+    getScoreboard(function (err, reply) {
+        if (err) {
+            useTemplate(scoreboard, 'html/scoreboard', {});
+            return;
+        }
+        // note using current question as score (off by one?) hence the name mismatch here
+        var scoreboard = {};
+        scoreboard["scores"] = replyToListOfHashes(['name', 'score'], reply);
+        useTemplate(response, 'html/scoreboard', scoreboard);
+    });
+}
 
+// only draws the internal div
+function wsScoreBoard() {
+    // needs {scores: [ {name: ..., score: ...}, ]}
+    getScoreboard(function (err, reply) {
+        if (err) {
+            // just don't send any data
+            sys.log("error trying to publish a scoreboard via websockets - not doing anything");
+            return;
+        }
+        // note using current question as score (off by one?) hence the name mismatch here
+        var scoreboard;
+        scoreboard["scores"] = replyToListOfHashes(['name', 'score'], reply);
+        useTemplate(scoreboard, 'html/scoreboard_div', scoreboard);
+
+        mu.render('html/scoreboard_div', scoreboard, {}, function(err, output) {
+            if (err) { throw err; }
+            var _content = '';
+            output.addListener('data', function(c) { _content += c;       });
+            output.addListener('end',  function()  { wsserver.broadcast(c)});
+        });
+    });
+}
+
+function getScoreboard(callback) {
+    rclient.sort('quiz:score', 'get', 'quiz:*->name', 'get', 'quiz:*->question', 'by', 'quiz:*->score', 'desc', callback);
+}
+
+function replyToListOfHashes(proto, list) {
+    var r = [];
+    // I'm awfully used to Perl, is there no better way?
+    var proto_loc = 0;
+    var entry = {};
+    for (var value in list) {
+        var key = proto[proto_loc];
+        entry[key] = list[value].toString();
+        proto_loc++;
+        if (proto_loc >= proto.length) {
+            proto_loc = 0;
+            r.push(entry);
+            entry = {};
+        }
+    }
+    return r;
+}
 
 
 // GET hanlders:
