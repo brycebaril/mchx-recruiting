@@ -170,6 +170,7 @@ function handleQuestion(request, response, args) {
             rclient.incr("quiz:correct:" + old, function(err, reply) {
                 var score = question * 1000000 - reply;
                 sys.log("Setting score for caller " + args.caller + " to " + score);
+                rclient.hset("quiz:" + args.caller, "score", score);
                 rclient.zadd("quiz:score", score, args.caller, function(err, reply) {
                     handleQuestion2(request, response, args, name, number, email, question, template, correct);
                 });
@@ -247,6 +248,9 @@ var postRoutes = {
                 useTemplate(response, 'html/register', {success: {message: "Thank you for registering."}});
                 sys.log("Registered " + args.caller_number + " for " + args.caller_name + " with email " + args.caller_email);
                 rclient.zcount("quiz:score", -100000000, 100000000, function(err, reply) {
+                    // zset for rank calculation
+                    // score entry in hash for easier recall via SORT
+                    rclient.hset("quiz:" + args.caller_number, "score", -reply);
                     rclient.zadd("quiz:score", -reply, args.caller_number);
                 });
             });
