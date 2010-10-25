@@ -12,6 +12,8 @@ mu.templateRoot = '../templates';
 var wsport = 8008;
 var webport = 8080;
 
+var inbound_number = 8007244683;
+
 var wsserver = ws.createServer();
 var rclient = redis.createClient();
 
@@ -34,7 +36,7 @@ function useTemplate(response, template, context, contentType) {
 
 var questions = [
     {},
-    { text: 'Multiple choice: What is your favorite programming language? 1 C plus plus 2 Java 3 Perl 4 Python 5 Ruby 6 Haskell 7 Erlang 8 Bourne Shell 9 Other',
+    { text: 'Multiple choice: What is your favorite programming language? 1 C plus plus 2 Java 3 Perl 4 Python 5 Ruby 6 Haskell 7 Erlang 8 Javascript 9 Other',
       answer: function(given) { return true; }
     },
     { text: 'About how many University of Washington Computer Science and Engineering undergraduate students graduate each year 50 100 160 or 250?',
@@ -71,7 +73,7 @@ var questions = [
       answer: '143'
     },
     { text: 'What is the XOR of your phone number and the phone number you called?',
-      answer: function(given, caller) { return given == (caller ^ 1234567890); }
+      answer: function(given, caller) { return given == (caller ^ inbound_number); }
     },
     { text: 'What is the first 9 digit prime palindrome in pi?',
       answer: '318272813'
