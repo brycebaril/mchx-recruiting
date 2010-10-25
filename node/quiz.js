@@ -106,10 +106,12 @@ var routes = {
         response.end();
     },
     '/register' : function(request, response, args) {
-        if (args == {}) {
+        if (request.method == 'GET') {
+            sys.log('Loading register page');
             useTemplate(response, 'html/register', {});
             return;
         }
+        sys.log('Processing new registrant');
         var errors = new Array();
         if (!args.caller_name  ) { args.caller_name   = ''; }
         if (!args.caller_number) { args.caller_number = ''; }
@@ -119,6 +121,7 @@ var routes = {
         if (!args.caller_number.match(/^\d\d\d\d\d\d\d\d\d\d$/)) { errors.push({message: "You must specify a 10-digit phone number including area code."}); }
         if (!args.caller_email .match(/^[^@, ]+@[^@, ]+$/))      { errors.push({message: "You must specify a valid email address."                      }); }
         if (errors.length > 0) {
+            sys.log('Failed registration: ' + sys.inspect(errors));
             useTemplate(response, 'html/register', {errors: errors});
             return;
         }
@@ -148,6 +151,7 @@ var routes = {
                     // zset for rank calculation
                     // score entry in hash for easier recall via SORT
                     rclient.hset("quiz:" + args.caller_number, "score", -reply);
+                    rclient.hset("quiz:" + args.caller_number, "correct", 0);
                     rclient.zadd("quiz:score", -reply, args.caller_number);
                     // update the scoreboard
                     wsScoreBoard();
@@ -219,6 +223,7 @@ function handleQuestion(request, response, args) {
                 var score = question * 1000000 - reply;
                 sys.log("Setting score for caller " + args.caller + " to " + score);
                 rclient.hset("quiz:" + args.caller, "score", score);
+                rclient.hset("quiz:" + args.caller, "correct", question - 1);
                 rclient.zadd("quiz:score", score, args.caller, function(err, reply) {
                     handleQuestion2(request, response, args, name, number, email, question, template, correct);
                 });
@@ -248,7 +253,7 @@ function handleQuestion2(request, response, args, name, number, email, question,
         else {
             reply = Math.floor(reply) + 1;
         }
-        sys.log("position: " + reply);
+        //sys.log("position: " + reply);
         useTemplate(response, template, { caller: args.caller, name: name,
                                           position: reply,
                                           answer_status: correct, answer_status_tts: answer_text[correct],
@@ -347,13 +352,13 @@ function wsScoreBoard() {
             if (err) { throw err; }
             var _content = '';
             output.addListener('data', function(c) { _content += c;       });
-            output.addListener('end',  function()  { wsserver.broadcast(_content)});
+            output.addListener('end',  function()  { sys.log(_content); wsserver.broadcast(_content)});
         });
     });
 }
 
 function getScoreboard(callback) {
-    rclient.sort('quiz:score', 'get', 'quiz:*->name', 'get', 'quiz:*->question', 'by', 'quiz:*->score', 'desc', callback);
+    rclient.sort('quiz:score', 'get', 'quiz:*->name', 'get', 'quiz:*->correct', 'by', 'quiz:*->score', 'desc', callback);
 }
 
 function replyToListOfHashes(proto, list) {
