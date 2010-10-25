@@ -3,10 +3,10 @@
 
 <form id="congrats">
 <block>
-    <audio src="http://uw.makehistory.com/audio/congrats.gsm">
-    Congratulations! You have answered all questions correctly.
-    </audio>
+    <voice gender="female">
+    This is a triumph. I'm making a note here, huge success.  It's hard to overstate my satisfaction.  You have completed all quesitons.
     You finished in {{position}} place. Goodbye.
+    </voice>
     </exit>
 </block>
 </form>

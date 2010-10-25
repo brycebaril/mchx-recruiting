@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <vxml version="2.0">
 
-<var position="{{position}}"/>
+<property name="timeout" value="4s"/>
+<property name="termtimeout" value="0s"/>
+<property name="bargein" value="true"/>
+<property name="ttsfetchtimeout" value="10s"/>
+
 <form id="welcome">
+<var name="position" expr="{{position}}"/>
 <block>
     <audio src="http://uw.makehistory.com/audio/{{answer_status}}.gsm">
     {{answer_status_tts}}
