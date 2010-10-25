@@ -86,16 +86,16 @@ var answer_text = {
     false: "That is not correct."
 };
 
-var getRoutes = {
-    '/' : function(request, response) {
+var routes = {
+    '/' : function(request, response, args) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
         drawFullScoreboard(response);
     },
-    '/ping' : function(request, response) {
+    '/ping' : function(request, response, args) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end('pong');
     },
-    '/robots.txt' : function(request, response) {
+    '/robots.txt' : function(request, response, args) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.write("User-agent: discobot\n");
         response.write("Disallow: /\n");
@@ -103,14 +103,65 @@ var getRoutes = {
         response.write("Disallow: /\n");
         response.end();
     },
-    '/register' : function(request, response) {
-        useTemplate(response, 'html/register', {});
+    '/register' : function(request, response, args) {
+        if (args == {}) {
+            useTemplate(response, 'html/register', {});
+            return;
+        }
+        var errors = new Array();
+        if (!args.caller_name  ) { args.caller_name   = ''; }
+        if (!args.caller_number) { args.caller_number = ''; }
+        if (!args.caller_email ) { args.caller_email  = ''; }
+        args.caller_number = args.caller_number.replace(/[^\d]/g,'');
+        if (!args.caller_name  .match(/^.+$/))                   { errors.push({message: "You must specify your name."                                  }); }
+        if (!args.caller_number.match(/^\d\d\d\d\d\d\d\d\d\d$/)) { errors.push({message: "You must specify a 10-digit phone number including area code."}); }
+        if (!args.caller_email .match(/^[^@, ]+@[^@, ]+$/))      { errors.push({message: "You must specify a valid email address."                      }); }
+        if (errors.length > 0) {
+            useTemplate(response, 'html/register', {errors: errors});
+            return;
+        }
+        rclient.getset("quiz:" + args.caller_number + ":active", "true", function(err, reply) {
+            if (err) {
+                useTemplate(response, 'html/register', {errors: {message: "There was an error storing your data.  Please try again."}});
+                return;
+            }
+            if (reply == "true") {
+                useTemplate(response, 'html/register', {errors: {message: "That phone number is already in use.  Please try another."}});
+                return;
+            }
+            rclient.hmset("quiz:" + args.caller_number,
+                          "name",     args.caller_name,
+                          "number",   args.caller_number,
+                          "email",    args.caller_email,
+                          "question", 0,
+                          function(err, reply) {
+                if (err) {
+                    useTemplate(response, 'html/register', {errors: {message: "There was an error storing your data.  Please try again."}});
+                    rclient.del("quiz:" + args.caller_number + ":active");
+                    return;
+                }
+                useTemplate(response, 'html/register', {success: {message: "Thank you for registering."}});
+                sys.log("Registered " + args.caller_number + " for " + args.caller_name + " with email " + args.caller_email);
+                rclient.zcount("quiz:score", -100000000, 100000000, function(err, reply) {
+                    // zset for rank calculation
+                    // score entry in hash for easier recall via SORT
+                    rclient.hset("quiz:" + args.caller_number, "score", -reply);
+                    rclient.zadd("quiz:score", -reply, args.caller_number);
+                });
+            });
+        });
     },
-    '/vxml' : function(request, response) {
-        response.writeHead(200, {'Content-Type': 'text/plain'});
-        response.end('vxml placeholder');
+    '/ping' : function(request, response, args) {
+        response.writeHead(200, {
+            "Content-Type": "text/plain"
+        });
+        response.write("Call from " + args.caller_name + " <"+ args.caller_number + "> (calling: " + args.called_number + ") complete.  Status: " + args.call_status);
+        response.end();
     },
+    '/vxml/question' : function(request, response, args) { handleQuestion(request, response, args); },
+    '/vxml/answer'   : function(request, response, args) { handleQuestion(request, response, args); },
 };
+
 
 function redirect(response, location, args) {
     var encoded = new Array();
@@ -207,71 +258,7 @@ function handleQuestion2(request, response, args, name, number, email, question,
     });
 }
 
-var postRoutes = {
-    '/' : function(request, response, args) {
-        response.writeHead(200, {'Content-Type': 'text/plain'});
-        response.end('placeholder');
-    },
-    '/register' : function(request, response, args) {
-        var errors = new Array();
-        if (!args.caller_name  ) { args.caller_name   = ''; }
-        if (!args.caller_number) { args.caller_number = ''; }
-        if (!args.caller_email ) { args.caller_email  = ''; }
-        args.caller_number = args.caller_number.replace(/[^\d]/g,'');
-        if (!args.caller_name  .match(/^.+$/))                   { errors.push({message: "You must specify your name."                                  }); }
-        if (!args.caller_number.match(/^\d\d\d\d\d\d\d\d\d\d$/)) { errors.push({message: "You must specify a 10-digit phone number including area code."}); }
-        if (!args.caller_email .match(/^[^@, ]+@[^@, ]+$/))      { errors.push({message: "You must specify a valid email address."                      }); }
-        if (errors.length > 0) {
-            useTemplate(response, 'html/register', {errors: errors});
-            return;
-        }
-        rclient.getset("quiz:" + args.caller_number + ":active", "true", function(err, reply) {
-            if (err) {
-                useTemplate(response, 'html/register', {errors: {message: "There was an error storing your data.  Please try again."}});
-                return;
-            }
-            if (reply == "true") {
-                useTemplate(response, 'html/register', {errors: {message: "That phone number is already in use.  Please try another."}});
-                return;
-            }
-            rclient.hmset("quiz:" + args.caller_number,
-                          "name",     args.caller_name,
-                          "number",   args.caller_number,
-                          "email",    args.caller_email,
-                          "question", 0,
-                          function(err, reply) {
-                if (err) {
-                    useTemplate(response, 'html/register', {errors: {message: "There was an error storing your data.  Please try again."}});
-                    rclient.del("quiz:" + args.caller_number + ":active");
-                    return;
-                }
-                useTemplate(response, 'html/register', {success: {message: "Thank you for registering."}});
-                sys.log("Registered " + args.caller_number + " for " + args.caller_name + " with email " + args.caller_email);
-                rclient.zcount("quiz:score", -100000000, 100000000, function(err, reply) {
-                    // zset for rank calculation
-                    // score entry in hash for easier recall via SORT
-                    rclient.hset("quiz:" + args.caller_number, "score", -reply);
-                    rclient.zadd("quiz:score", -reply, args.caller_number);
-                });
-            });
-        });
-    },
-    '/ping' : function(request, response, args) {
-        response.writeHead(200, {
-            "Content-Type": "text/plain"
-        });
-        response.write("Call from " + args.caller_name + " <"+ args.caller_number + "> (calling: " + args.called_number + ") complete.  Status: " + args.call_status);
-        response.end();
-    },
-    '/vxml/question' : function(request, response, args) { handleQuestion(request, response, args); },
-    '/vxml/answer'   : function(request, response, args) { handleQuestion(request, response, args); },
-    '/vxml' : function(request, response, args) {
-        response.writeHead(200, {'Content-Type': 'text/plain'});
-        response.end('vxml placeholder');
-    },
-};
-
-function not_found(request, response) {
+function notFound(request, response) {
     response.writeHead(404, {'Content-Type': 'text/plain'});
     response.end('Not here.');
 }
@@ -279,7 +266,8 @@ function not_found(request, response) {
 wsserver.addListener("connection", function(connection){
     // collect current votes and display those
     // how to distinguish between different polls?
-    connection.send("Connected. Waiting for votes...");
+    //connection.send("Connected. Waiting for votes...");
+    wsScoreBoard();
 });
 
 wsserver.listen(wsport);
@@ -287,30 +275,26 @@ sys.log("ws: listening on " + wsport);
 
 // listen for posts, and then broadcast messages to ws clients
 var webserver = http.createServer(function (request, response) {
-    if (request.method == 'POST') {
+    if (request.method == 'POST' || request.method == 'GET') {
         var pathname = url.parse(request.url).pathname;
-        if (postRoutes[pathname] === undefined) {
-            not_found(request, response);
+        if (routes[pathname] === undefined) {
+            notFound(request, response);
         }
         else {
-            post_handler(request, function(request_data) { postRoutes[pathname].call(this, request, response, request_data) });
-        }
-    }
-    else if (request.method == 'GET') {
-        // send vxml
-        // based off query params?
-        var pathname = url.parse(request.url).pathname;
-        if (getRoutes[pathname] === undefined) {
-            not_found(request, response);
-        }
-        else {
-            getRoutes[pathname].call(this, request, response);
+            if (request.method == 'GET') {
+                var args = querystring.parse(url.parse(request.url).query);
+                routes[pathname].call(this, request, response, args);
+            }
+            else {
+                // POST
+                post_handler(request, function(request_data) { routes[pathname].call(this, request, response, request_data) });
+            }
         }
     }
     else {
         // could parse any query params here
         sys.log("Handled a " + request.method + ".  Huh.  Didn't expect that. Gave 'em a 404.");
-        not_found(request, response);
+        notFound(request, response);
     }
 
 }).listen(webport);
@@ -356,15 +340,14 @@ function wsScoreBoard() {
             return;
         }
         // note using current question as score (off by one?) hence the name mismatch here
-        var scoreboard;
+        var scoreboard = {};
         scoreboard["scores"] = replyToListOfHashes(['name', 'score'], reply);
-        useTemplate(scoreboard, 'html/scoreboard_div', scoreboard);
 
         mu.render('html/scoreboard_div', scoreboard, {}, function(err, output) {
             if (err) { throw err; }
             var _content = '';
             output.addListener('data', function(c) { _content += c;       });
-            output.addListener('end',  function()  { wsserver.broadcast(c)});
+            output.addListener('end',  function()  { wsserver.broadcast(_content)});
         });
     });
 }
