@@ -92,6 +92,8 @@ var routes = {
         drawFullScoreboard(response);
     },
     '/ping' : function(request, response, args) {
+        // update the scoreboard
+        wsScoreBoard();
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end('pong');
     },
@@ -147,16 +149,11 @@ var routes = {
                     // score entry in hash for easier recall via SORT
                     rclient.hset("quiz:" + args.caller_number, "score", -reply);
                     rclient.zadd("quiz:score", -reply, args.caller_number);
+                    // update the scoreboard
+                    wsScoreBoard();
                 });
             });
         });
-    },
-    '/ping' : function(request, response, args) {
-        response.writeHead(200, {
-            "Content-Type": "text/plain"
-        });
-        response.write("Call from " + args.caller_name + " <"+ args.caller_number + "> (calling: " + args.called_number + ") complete.  Status: " + args.call_status);
-        response.end();
     },
     '/vxml/question' : function(request, response, args) { handleQuestion(request, response, args); },
     '/vxml/answer'   : function(request, response, args) { handleQuestion(request, response, args); },
@@ -225,6 +222,8 @@ function handleQuestion(request, response, args) {
                 rclient.zadd("quiz:score", score, args.caller, function(err, reply) {
                     handleQuestion2(request, response, args, name, number, email, question, template, correct);
                 });
+                // update the scoreboard
+                wsScoreBoard();
             });
         } else {
             handleQuestion2(request, response, args, name, number, email, question, template, correct);
@@ -333,6 +332,7 @@ function drawFullScoreboard(response) {
 // only draws the internal div
 function wsScoreBoard() {
     // needs {scores: [ {name: ..., score: ...}, ]}
+    sys.log("Updating websocket scoreboards");
     getScoreboard(function (err, reply) {
         if (err) {
             // just don't send any data
