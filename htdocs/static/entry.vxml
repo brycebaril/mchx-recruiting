@@ -12,8 +12,7 @@ function uri_to_number(uri){
 
 var nocache = Math.floor(Math.random() * 100000);
 
-//var caller = uri_to_number( session.connection.remote.uri );
-var caller = undefined;
+var caller = uri_to_number( session.connection.remote.uri );
 
 ]]></script>
 
