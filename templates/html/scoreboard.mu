@@ -6,11 +6,10 @@
 
     $(function() {
         var conn;
-        var scoreboard = $("#scoreboard");
 
         function replaceScoreboard(msg) {
-            scoreboard.replaceWith(msg)
-            var d = scoreboard[0]
+            $("#scoreboard").replaceWith(msg)
+            var d = $("#scoreboard")[0]
             var doScroll = d.scrollTop == d.scrollHeight - d.clientHeight;
             if (doScroll) {
                 d.scrollTop = d.scrollHeight - d.clientHeight;
@@ -23,11 +22,12 @@
                 replaceScoreboard("<div><b>Connection closed.</b></div>")
             }
             conn.onmessage = function(evt) {
-                replaceScoreboard(evt.data)
+                //replaceScoreboard(evt.data)
+                $("#scoreboard").replaceWith(evt.data)
             }
         }
         else {
-            replaceScoreboard("<div><b>Your browser does not support WebSockets. Try Google Chrome or Safari.</b></div>")
+            $("<div><b>Your browser does not support WebSockets. Try Google Chrome or Safari.</b></div>").appendTo($("#scoreboard"))
         }
     });
 
@@ -43,4 +43,4 @@
         <!-- TODO logos, link to registration, phone number, etc. -->
         <!-- powered by Marchex Call Analytics, Node.js, jQuery, Redis, Nginx -->
     </body>
-</html
+</html>

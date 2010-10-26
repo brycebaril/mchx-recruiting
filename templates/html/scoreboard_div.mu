@@ -1,8 +1,10 @@
-<div>
+<div id="scoreboard">
+<ol>
 {{#scores}}
-    <div>{{name}} - {{score}}</div>
+    <li>{{name}} - {{score}}</li>
 {{/scores}}
 {{^scores}}
 Waiting for scores...
 {{/scores}}
+</ol>
 </div>
