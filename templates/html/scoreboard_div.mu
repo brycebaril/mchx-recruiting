@@ -1,4 +1,7 @@
 <div id="scoreboard">
+{{msg}}
+<br/>
+<br/>
 <ol>
 {{#scores}}
     <li>{{name}} - {{score}}</li>

@@ -95,7 +95,7 @@ var routes = {
     },
     '/ping' : function(request, response, args) {
         // update the scoreboard
-        wsScoreBoard();
+        //wsScoreBoard('');
         response.writeHead(200, {'Content-Type': 'text/plain'});
         response.end('pong');
     },
@@ -147,7 +147,7 @@ var routes = {
                     rclient.del("quiz:" + args.caller_number + ":active");
                     return;
                 }
-                useTemplate(response, 'html/register', {success: {message: "Thank you for registering."}});
+                useTemplate(response, 'html/register', {success: {message: "Thank you for registering.  You can now call (800) 724-4683 from your registered number to play!"}});
                 sys.log("Registered " + args.caller_number + " for " + args.caller_name + " with email " + args.caller_email);
                 rclient.zcount("quiz:score", -100000000, 100000000, function(err, reply) {
                     // zset for rank calculation
@@ -156,7 +156,7 @@ var routes = {
                     rclient.hset("quiz:" + args.caller_number, "correct", 0);
                     rclient.zadd("quiz:score", -reply, args.caller_number);
                     // update the scoreboard
-                    wsScoreBoard();
+                    wsScoreBoard(args.caller_name + ' just registered.');
                 });
             });
         });
@@ -230,10 +230,16 @@ function handleQuestion(request, response, args) {
                     handleQuestion2(request, response, args, name, number, email, question, template, correct);
                 });
                 // update the scoreboard
-                wsScoreBoard();
+                wsScoreBoard(name + " just answered question " + (question - 1) + ' correctly!');
             });
         } else {
             handleQuestion2(request, response, args, name, number, email, question, template, correct);
+            if (args.answer !== undefined) {
+                wsScoreBoard(name + " just answered question " + question + ' incorrectly...');
+            }
+            else {
+                wsScoreBoard(name + ' is working on question ' + question);
+            }
         }
     });
 }
@@ -275,7 +281,7 @@ wsserver.addListener("connection", function(connection){
     // collect current votes and display those
     // how to distinguish between different polls?
     //connection.send("Connected. Waiting for votes...");
-    wsScoreBoard();
+    wsScoreBoard('');
 });
 
 wsserver.addListener("error", function(connection, error) {
@@ -345,7 +351,7 @@ function drawFullScoreboard(response) {
 }
 
 // only draws the internal div
-function wsScoreBoard() {
+function wsScoreBoard(msg) {
     // needs {scores: [ {name: ..., score: ...}, ]}
     sys.log("Updating websocket scoreboards");
     getScoreboard(function (err, reply) {
@@ -355,7 +361,7 @@ function wsScoreBoard() {
             return;
         }
         // note using current question as score (off by one?) hence the name mismatch here
-        var scoreboard = {};
+        var scoreboard = {msg: msg};
         scoreboard["scores"] = replyToListOfHashes(['name', 'score'], reply);
 
         mu.render('html/scoreboard_div', scoreboard, {}, function(err, output) {

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vxml version="2.0">
+
+<script><![CDATA[
+
+// covert tel: uris to numbers
+function uri_to_number(uri){
+    if( ! uri ) return;
+    uri = uri.split(':');
+    return uri[1];
+}
+
+var nocache = Math.floor(Math.random() * 100000);
+
+var caller = uri_to_number( session.connection.remote.uri );
+
+]]></script>
+
+<form id="entry">
+<block>
+    <if cond='caller == undefined || caller == ""'>
+        <audio src="http://uw.makehistory.com/audio/sorry.gsm">
+        I'm sorry, I was not able to see your caller i d.  Perhaps you were blocking it? Goodbye.
+        </audio>
+        <exit/>
+    <else/>
+        <submit next="http://uw.makehistory.com/vxml/question"
+            method="get"
+            namelist="caller nocache"/>
+    </if>
+</block>
+</form>
+
+</vxml>
