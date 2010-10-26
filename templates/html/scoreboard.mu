@@ -19,7 +19,7 @@
         if (window["WebSocket"]) {
             conn = new WebSocket("ws://uw.makehistory.com:8008/ws");
             conn.onclose = function(evt) {
-                replaceScoreboard("<div><b>Connection closed.</b></div>")
+                $("<div><b>Connection closed.</b></div>").appendTo($("#scoreboard"));
             }
             conn.onmessage = function(evt) {
                 //replaceScoreboard(evt.data)

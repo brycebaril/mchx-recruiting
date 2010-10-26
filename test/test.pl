@@ -27,11 +27,15 @@ for (@players) {
 get_question($players[0]);
 get_question($players[0]);
 get_question($players[0]);
+get_question($players[1]);
+get_question($players[2]);
 
 answer($players[0], 3);
 answer($players[0], 3);
 answer($players[0], 3);
-answer($players[0], 3);
+answer($players[0], 160);
+answer($players[1], 3);
+answer($players[2], 3);
 
 # GET
 sub ping {

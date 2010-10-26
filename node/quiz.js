@@ -362,7 +362,7 @@ function wsScoreBoard() {
             if (err) { throw err; }
             var _content = '';
             output.addListener('data', function(c) { _content += c;       });
-            output.addListener('end',  function()  { sys.log(_content); wsserver.broadcast(_content)});
+            output.addListener('end',  function()  { wsserver.broadcast(_content)});
         });
     });
 }
