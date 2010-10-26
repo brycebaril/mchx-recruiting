@@ -27,7 +27,7 @@ function useTemplate(response, template, context, contentType) {
         }
     }
     mu.render(template, context, {}, function(err, output) {
-        if (err) { throw err; }
+        if (err) { sys.log('ERROR: ' + err); return; }
         response.writeHead(200, {'Content-Type': contentType});
         output.addListener('data', function(c) { response.write(c); });
         output.addListener('end',  function()  { response.end();    });
@@ -215,7 +215,7 @@ function handleQuestion(request, response, args) {
             else {
                 correct = args.answer == questions[question].answer;
             }
-            sys.log("Grading question " + question + " for caller " + args.caller + ": " + correct);
+            sys.log("Grading question " + question + " for caller " + args.caller + "(answer: " + args.answer + "): " + correct);
         }
         if (correct) {
             var old = question;
@@ -276,6 +276,12 @@ wsserver.addListener("connection", function(connection){
     // how to distinguish between different polls?
     //connection.send("Connected. Waiting for votes...");
     wsScoreBoard();
+});
+
+wsserver.addListener("error", function(connection, error) {
+    // library has no documentation for this, nor do I know how to trigger it.
+    // this may do nothing.
+    sys.log("got a websocket error.  weird.");
 });
 
 wsserver.listen(wsport);
