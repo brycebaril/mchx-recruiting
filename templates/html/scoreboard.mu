@@ -1,25 +1,23 @@
 {{>html/header}}
     <h2><br />Make History Quiz - Scoreboard</h2>
-    {{>html/scoreboard_div}}
-    <div class="sub_topic">
+    <div style="float:right">
     <a href="register">Register here</a>
     <br />
-    The call-in number for the quiz is: (800) 724-4683
-    <br />
-    <br />
+    The call-in number for the quiz is: <strong>(800) 724-4683</strong>
     <br />
     Quiz Powered by:
     <br />
-    <img src="img/mca.jpg"/>
+    <img width="250" src="img/mca.jpg"/>
     <br />
-    <img src="img/node.png"/>
+    <img width="250" src="img/node.png"/>
     <br />
-    <img src="img/redis.png"/>
+    <img width="250" src="img/redis.png"/>
     <br />
-    <img src="img/jquery.png"/>
+    <img width="250" src="img/jquery.png"/>
     <br />
-    <img src="img/nginx.png"/>
+    <img width="250" src="img/nginx.png"/>
     </div>
+    {{>html/scoreboard_div}}
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
     <script type="text/javascript">
 
