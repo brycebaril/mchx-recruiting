@@ -23,6 +23,8 @@
     *The phone number you enter is used to track your progress, and must match the number you call from.
     <br/>
     <br/>
+    <a href="http://uw.makehistory.com">View the LIVE Scoreboard</a>
+    <br />
     The call-in number for the quiz is: <bold>(800) 724-4683</bold>
     <br/>
     <img src="img/quiz_tel.png"/>
