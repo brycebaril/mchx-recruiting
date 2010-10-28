@@ -290,6 +290,10 @@ wsserver.addListener("error", function(connection, error) {
     sys.log("got a websocket error.  weird.");
 });
 
+process.on('uncaughtException', function (err) {
+    sys.log('Caught exception: ' + err);
+});
+
 wsserver.listen(wsport);
 sys.log("ws: listening on " + wsport);
 
